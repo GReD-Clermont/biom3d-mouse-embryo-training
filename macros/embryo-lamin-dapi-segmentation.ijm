@@ -3,15 +3,14 @@
 // @Integer(label="DAPI channel", value=4) dapi
 // @Integer(label="Dynamic", value=12) dynamic
 // @Double(label="Gaussian size (um)", value=0.27, stepSize=0.05) gaussian
-// @Double(label="Unsharp (pixels)", value=20.0, stepSize=0.05) unsharp
 // @Double(label="Scale factor", value=0.5, stepSize=0.1) scale
 // @Boolean(label="Background subtraction", value=false) background_subtraction
+
+setBatchMode("hide");
 
 title = getTitle();
 getVoxelSize(v_width, v_height, v_depth, unit);
 getDimensions(width, height, channels, slices, frames);
-
-setBatchMode("hide");
 
 upscale_z = scale * v_depth / v_width;
 voxel_volume = v_width * v_height * v_depth;
@@ -30,6 +29,7 @@ if(background_subtraction) {
     imageCalculator("Subtract stack", "tmp-"+title, "bg");
     close("bg");
 }
+
 run("Gaussian Blur 3D...", "x=" + fsize_xy + " y=" + fsize_xy + " z=" + fsize_xy);
 run("Extended Min & Max 3D", "operation=[Extended Minima] dynamic=" + dynamic + " connectivity=6");
 rename("tmp-regmin");
@@ -51,4 +51,13 @@ close("tmp-*");
 selectWindow(title);
 run("Split Channels");
 run("Merge Channels...", "c1=[C1-"+title+"] c2=[C2-"+title+"] c3=labels create");
+
+//print the parameters to save them
+print("Lamin channel = "+lamin);
+print("DAPI channel = "+dapi);
+print("Dynamic = "+dynamic);
+print("Gaussian size µm = "+gaussian);
+print("Scaling factor = "+scale);
+print("Bg subtraction = "+background_subtraction);
+
 setBatchMode("exit and display");
